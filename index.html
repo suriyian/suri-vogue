@@ -308,12 +308,11 @@
       <div class="modal-body">
         <div class="upload-zone" id="outfitUploadZone">
           <div class="upload-icon">📸</div>
-          <p>上传全身搭配照</p>
-          <input type="file" id="outfitFileInput" accept="image/*" hidden>
+          <p>上传搭配照片</p>
+          <p class="upload-hint">支持多张，同一搭配风格</p>
+          <input type="file" id="outfitFileInput" accept="image/*" multiple hidden>
         </div>
-        <div class="hidden" id="outfitPreview">
-          <img id="outfitPreviewImg" class="confirm-img" alt="">
-        </div>
+        <div class="upload-thumbs hidden" id="outfitPreviewArea"></div>
         <div class="form-group"><label>季节</label>
           <div class="filter-scroll" id="outfitSeasonPick">
             <button class="filter-chip" data-val="四季">四季</button>
@@ -379,6 +378,16 @@
       <div class="modal-body">
         <div class="pick-grid" id="recordPickGrid"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Prompt: add outfit for item -->
+  <div id="modalPromptOutfit" class="modal hidden">
+    <div class="modal-content modal-sm">
+      <h3>为这件单品添加搭配参考？</h3>
+      <p style="font-size:.78rem;color:var(--grey-500);text-align:center;margin-bottom:16px">上传搭配照帮助系统学习你的搭配风格</p>
+      <button class="btn-primary" id="btnPromptYes" style="margin-bottom:10px">添加搭配图</button>
+      <button class="btn-outline-dark" id="btnPromptSkip" style="width:100%">跳过</button>
     </div>
   </div>
 

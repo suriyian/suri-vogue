@@ -251,24 +251,39 @@ function saveItem(isLast){
   const id=uid(),imgId='item_'+id;saveImage(imgId,itemBatch[itemBatchIdx]);
   S.items.push({id,imageId:imgId,images:[imgId],category:cat,color,seasons,occasions,tempMin:Math.min(tMin,tMax),tempMax:Math.max(tMin,tMax),note,liked:false,createdAt:new Date().toISOString()});
   saveS();toast('已入库 ✓');
-  if(isLast){document.getElementById('modalAddItem').classList.add('hidden');renderWardrobe()}
+  // After saving, offer to add outfit photos for this item
+  lastSavedItemId=id;
+  if(isLast){document.getElementById('modalAddItem').classList.add('hidden');renderWardrobe();promptAddOutfitForItem()}
   else{itemBatchIdx++;showItemConfirm(itemBatchIdx)}}
 
-// === ADD OUTFIT ===
-let outfitImg=null,linkedIds=[];
-function openAddOutfit(){outfitImg=null;linkedIds=[];
+// Prompt to add outfit after item saved
+let lastSavedItemId=null;
+function promptAddOutfitForItem(){
+  if(!lastSavedItemId)return;
+  const m=document.getElementById('modalPromptOutfit');m.classList.remove('hidden');
+  document.getElementById('btnPromptYes').onclick=()=>{m.classList.add('hidden');openAddOutfitForItem(lastSavedItemId)};
+  document.getElementById('btnPromptSkip').onclick=()=>{m.classList.add('hidden');lastSavedItemId=null}}
+
+function openAddOutfitForItem(itemId){linkedIds=[itemId];openAddOutfit();renderLinkedItems()}
+
+// === ADD OUTFIT (supports multi-photo) ===
+let outfitImages=[],linkedIds=[];
+function openAddOutfit(){outfitImages=[];
   document.getElementById('modalAddOutfit').classList.remove('hidden');
   document.getElementById('outfitUploadZone').classList.remove('hidden');
-  document.getElementById('outfitPreview').classList.add('hidden');
+  document.getElementById('outfitPreviewArea').classList.add('hidden');
+  document.getElementById('outfitPreviewArea').innerHTML='';
   document.querySelectorAll('#outfitSeasonPick .filter-chip').forEach(c=>c.classList.remove('active'));
   document.getElementById('outfitNote').value='';renderLinkedItems()}
 
 document.getElementById('outfitUploadZone').addEventListener('click',()=>document.getElementById('outfitFileInput').click());
 document.getElementById('outfitFileInput').addEventListener('change',async e=>{
-  const f=e.target.files[0];if(!f)return;outfitImg=await compress(await readFile(f));
-  document.getElementById('outfitPreviewImg').src=outfitImg;
-  document.getElementById('outfitPreview').classList.remove('hidden');
-  document.getElementById('outfitUploadZone').classList.add('hidden');e.target.value=''});
+  const files=Array.from(e.target.files).slice(0,10);if(!files.length)return;
+  for(const f of files)outfitImages.push(await compress(await readFile(f)));
+  document.getElementById('outfitPreviewArea').classList.remove('hidden');
+  document.getElementById('outfitPreviewArea').innerHTML=outfitImages.map((img,i)=>`<div class="upload-thumb-item"><img src="${img}" alt=""><div class="thumb-idx">${i+1}</div></div>`).join('');
+  document.getElementById('outfitUploadZone').classList.add('hidden');
+  e.target.value=''});
 
 document.getElementById('outfitSeasonPick').addEventListener('click',e=>{const c=e.target.closest('.filter-chip');if(!c)return;
   if(c.dataset.val==='四季'){['春','夏','秋','冬'].forEach(s=>{const el=c.parentElement.querySelector(`[data-val="${s}"]`);el?.classList.add('active')});c.classList.add('active')}
@@ -287,13 +302,14 @@ document.getElementById('btnLinkAddNew').addEventListener('click',()=>{
   toast('添加单品后，重新打开搭配组继续关联')});
 
 document.getElementById('btnSaveOutfit').addEventListener('click',()=>{
-  if(!outfitImg){toast('请上传搭配照');return}
+  if(!outfitImages.length){toast('请上传搭配照');return}
   if(!linkedIds.length){toast('请关联至少一件单品');return}
   const seasons=[...document.querySelectorAll('#outfitSeasonPick .filter-chip.active')].map(c=>c.dataset.val).filter(v=>v!=='四季');
   const note=document.getElementById('outfitNote').value.trim();
-  const id=uid(),imgId='outfit_'+id;saveImage(imgId,outfitImg);
-  S.outfits.push({id,imageId:imgId,linkedItemIds:[...linkedIds],seasons,note,liked:false,createdAt:new Date().toISOString()});
-  saveS();document.getElementById('modalAddOutfit').classList.add('hidden');renderWardrobe();toast('搭配组已保存 ✓')});
+  const id=uid();
+  const imgIds=outfitImages.map((img,i)=>{const iid='outfit_'+id+'_'+i;saveImage(iid,img);return iid});
+  S.outfits.push({id,imageId:imgIds[0],images:imgIds,linkedItemIds:[...linkedIds],seasons,note,liked:false,createdAt:new Date().toISOString()});
+  saveS();document.getElementById('modalAddOutfit').classList.add('hidden');renderWardrobe();toast(`搭配组已保存（${outfitImages.length}张）✓`);lastSavedItemId=null});
 
 // === PICK ITEMS MODAL ===
 let pickCb=null;
