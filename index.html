@@ -6,14 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SURI VOGUE — 我的智能衣橱</title>
-<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<!-- App Shell -->
 <div id="app">
-  <!-- Splash Screen -->
+  <!-- Splash -->
   <div id="splash" class="splash">
     <div class="splash-inner">
       <div class="splash-logo">S·V</div>
@@ -22,22 +20,28 @@
     </div>
   </div>
 
-  <!-- Main Container -->
+  <!-- Main -->
   <div id="main" class="main">
-    <!-- Top Bar -->
     <header class="topbar">
       <div class="topbar-left" id="topbarLeft"></div>
       <div class="topbar-title" id="topbarTitle">SURI VOGUE</div>
       <div class="topbar-right" id="topbarRight"></div>
     </header>
 
-    <!-- Page: 今日穿搭 (Home) -->
+    <!-- ===== PAGE: 今日 ===== -->
     <section id="page-home" class="page active">
       <div class="page-scroll">
         <div class="home-hero">
           <div class="home-date" id="homeDate"></div>
-          <h1 class="home-greeting" id="homeGreeting">今天穿什么？</h1>
+          <h1 class="home-greeting" id="homeGreeting"></h1>
         </div>
+        <!-- 今天穿了什么 -->
+        <div class="today-wear-prompt" id="todayWearPrompt">
+          <span class="twp-text">今天穿了什么？</span>
+          <span class="twp-chosen hidden" id="twpChosen"></span>
+          <button class="twp-btn" id="btnTodayWear">记录</button>
+        </div>
+        <!-- Input Card -->
         <div class="home-input-card">
           <div class="input-row">
             <label class="input-label">气温</label>
@@ -59,67 +63,95 @@
               <button class="tag-btn" data-occasion="度假">度假</button>
             </div>
           </div>
-          <button class="btn-primary" id="btnRecommend">为我搭配</button>
+          <button class="btn-primary-light" id="btnRecommend">为我搭配</button>
         </div>
-
-        <!-- Recommendations -->
-        <div id="recommendations" class="reco-container hidden">
-          <div class="reco-header">
-            <h2 class="section-title">今日推荐</h2>
-            <button class="btn-text" id="btnRefresh">换一批</button>
+        <!-- Digital Human + Recommendations -->
+        <div id="recoSection" class="reco-section hidden">
+          <div class="digital-human-wrap">
+            <div class="dh-placeholder" id="dhDisplay">
+              <div class="dh-hint">数字人试衣<br><span style="font-size:0.7rem;color:var(--grey-400)">接入可灵后展示</span></div>
+            </div>
           </div>
-          <div class="reco-list" id="recoList"></div>
+          <div class="reco-switcher" id="recoSwitcher"></div>
+          <button class="btn-outline-dark" id="btnSelfStyle">自我搭配</button>
         </div>
-
-        <!-- Recent Wears -->
+        <!-- Self-style panel -->
+        <div id="selfStylePanel" class="self-style-panel hidden">
+          <h3 class="section-title">选择单品搭配</h3>
+          <div class="self-style-grid" id="selfStyleGrid"></div>
+          <button class="btn-primary" id="btnConfirmSelfStyle">确认搭配</button>
+        </div>
+        <!-- Recent -->
         <div class="recent-section">
           <h2 class="section-title">最近穿过</h2>
-          <div class="recent-list" id="recentList">
-            <div class="empty-hint">还没有穿着记录</div>
-          </div>
+          <div class="recent-list" id="recentList"><div class="empty-hint">还没有穿着记录</div></div>
         </div>
       </div>
     </section>
 
-    <!-- Page: 我的衣橱 -->
+    <!-- ===== PAGE: 衣橱 ===== -->
     <section id="page-wardrobe" class="page">
       <div class="page-scroll">
         <div class="wardrobe-header">
           <h1 class="page-title-lg">衣橱</h1>
-          <div class="wardrobe-stats" id="wardrobeStats">0 件单品 · 0 套搭配</div>
+          <div class="wardrobe-stats" id="wardrobeStats"></div>
         </div>
-        <!-- Filter Bar -->
-        <div class="filter-bar">
-          <div class="filter-scroll" id="categoryFilter">
-            <button class="filter-chip active" data-cat="all">全部</button>
-            <button class="filter-chip" data-cat="上装">上装</button>
-            <button class="filter-chip" data-cat="下装">下装</button>
-            <button class="filter-chip" data-cat="外套">外套</button>
-            <button class="filter-chip" data-cat="连衣裙">连衣裙</button>
-            <button class="filter-chip" data-cat="鞋子">鞋子</button>
-            <button class="filter-chip" data-cat="包">包</button>
-            <button class="filter-chip" data-cat="配饰">配饰</button>
-          </div>
-        </div>
-        <!-- Items Grid -->
-        <div class="items-grid" id="itemsGrid">
-          <div class="empty-state">
-            <div class="empty-icon">👗</div>
-            <p>衣橱还是空的</p>
-            <p class="empty-sub">点击下方 + 开始添加你的衣服</p>
-          </div>
-        </div>
-        <!-- Outfits Tab -->
-        <div class="tab-switch">
+        <!-- Level 1 Tab: 单品 / 搭配组 -->
+        <div class="tab-switch" id="wardrobeTab">
           <button class="tab-btn active" data-tab="items">单品</button>
           <button class="tab-btn" data-tab="outfits">搭配组</button>
         </div>
-        <div class="outfits-grid hidden" id="outfitsGrid"></div>
+        <!-- Items filters -->
+        <div class="filter-section" id="filterSection">
+          <div class="filter-row">
+            <label class="filter-label">类别</label>
+            <div class="filter-scroll" id="filterCategory">
+              <button class="filter-chip active" data-val="all">全部</button>
+              <button class="filter-chip" data-val="上装">上装</button>
+              <button class="filter-chip" data-val="下装">下装</button>
+              <button class="filter-chip" data-val="外套">外套</button>
+              <button class="filter-chip" data-val="连衣裙">连衣裙</button>
+              <button class="filter-chip" data-val="鞋子">鞋子</button>
+              <button class="filter-chip" data-val="配饰">配饰</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <label class="filter-label">季节</label>
+            <div class="filter-scroll" id="filterSeason">
+              <button class="filter-chip active" data-val="all">全部</button>
+              <button class="filter-chip" data-val="春">春</button>
+              <button class="filter-chip" data-val="夏">夏</button>
+              <button class="filter-chip" data-val="秋">秋</button>
+              <button class="filter-chip" data-val="冬">冬</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <label class="filter-label">颜色</label>
+            <div class="filter-scroll" id="filterColor">
+              <button class="filter-chip active" data-val="all">全部</button>
+              <button class="filter-chip" data-val="黑">黑</button>
+              <button class="filter-chip" data-val="白">白</button>
+              <button class="filter-chip" data-val="灰">灰</button>
+              <button class="filter-chip" data-val="米">米</button>
+              <button class="filter-chip" data-val="棕">棕</button>
+              <button class="filter-chip" data-val="蓝">蓝</button>
+              <button class="filter-chip" data-val="红">红</button>
+              <button class="filter-chip" data-val="粉">粉</button>
+              <button class="filter-chip" data-val="绿">绿</button>
+              <button class="filter-chip" data-val="紫">紫</button>
+              <button class="filter-chip" data-val="黄">黄</button>
+            </div>
+          </div>
+        </div>
+        <!-- Items grid (2 per row) -->
+        <div class="wardrobe-grid" id="wardrobeGrid"></div>
+        <!-- Outfits grid -->
+        <div class="wardrobe-grid hidden" id="outfitsGrid"></div>
       </div>
       <button class="fab" id="fabAdd">+</button>
     </section>
 
-    <!-- Page: 个人档案 -->
+    <!-- ===== PAGE: 我的 ===== -->
     <section id="page-profile" class="page">
       <div class="page-scroll">
         <div class="profile-hero">
@@ -131,19 +163,10 @@
           <h1 class="profile-name" id="profileName">设置你的档案</h1>
         </div>
         <div class="profile-form">
-          <div class="form-group">
-            <label>昵称</label>
-            <input type="text" id="inputNickname" placeholder="你的名字" class="form-input">
-          </div>
+          <div class="form-group"><label>昵称</label><input type="text" id="inputNickname" placeholder="你的名字" class="form-input"></div>
           <div class="form-row">
-            <div class="form-group half">
-              <label>身高 (cm)</label>
-              <input type="number" id="inputHeight" placeholder="165" class="form-input">
-            </div>
-            <div class="form-group half">
-              <label>体重 (kg)</label>
-              <input type="number" id="inputWeight" placeholder="55" class="form-input">
-            </div>
+            <div class="form-group half"><label>身高 (cm)</label><input type="number" id="inputHeight" placeholder="165" class="form-input"></div>
+            <div class="form-group half"><label>体重 (kg)</label><input type="number" id="inputWeight" placeholder="55" class="form-input"></div>
           </div>
           <div class="form-group">
             <label>穿衣风格偏好</label>
@@ -160,21 +183,21 @@
           </div>
           <button class="btn-primary" id="btnSaveProfile">保存档案</button>
         </div>
+        <!-- Wear diary -->
+        <div class="wear-diary">
+          <h3 class="section-title" style="padding:0 24px">穿着日记</h3>
+          <div class="diary-list" id="diaryList"><div class="empty-hint">还没有记录</div></div>
+        </div>
+        <div class="profile-settings">
+          <h3 class="settings-title">设置</h3>
+          <div class="setting-row"><span>冷却天数</span>
+            <div class="stepper"><button class="stepper-btn" data-field="cooldown" data-delta="-1">−</button><span id="cooldownValue">7</span><button class="stepper-btn" data-field="cooldown" data-delta="1">+</button></div>
+          </div>
+        </div>
         <div class="profile-actions">
           <button class="btn-outline" id="btnExport">导出数据</button>
           <button class="btn-outline" id="btnImport">导入数据</button>
           <input type="file" id="importInput" accept=".json" hidden>
-        </div>
-        <div class="profile-settings">
-          <h3 class="settings-title">推荐设置</h3>
-          <div class="setting-row">
-            <span>冷却天数</span>
-            <div class="stepper">
-              <button class="stepper-btn" data-field="cooldown" data-delta="-1">−</button>
-              <span id="cooldownValue">7</span>
-              <button class="stepper-btn" data-field="cooldown" data-delta="1">+</button>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -196,106 +219,184 @@
     </nav>
   </div>
 
-  <!-- Modal: Add Items (Redesigned) -->
-  <div id="modalAdd" class="modal hidden">
+  <!-- ===== MODAL: Choose upload type ===== -->
+  <div id="modalUploadType" class="modal hidden">
+    <div class="modal-content modal-sm">
+      <h3>添加什么？</h3>
+      <button class="choice-btn" id="btnAddItem">👕 单品图<span class="choice-sub">单独的一件上衣、裤子、鞋子…</span></button>
+      <button class="choice-btn" id="btnAddOutfit">👗 搭配组图<span class="choice-sub">全身照/模特照，关联已有单品</span></button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Add Item ===== -->
+  <div id="modalAddItem" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <button class="modal-close" id="modalAddClose">✕</button>
-        <h2 id="modalAddTitle">添加衣服</h2>
-        <span class="modal-progress" id="modalProgress"></span>
+        <button class="modal-close" data-close="modalAddItem">✕</button>
+        <h2>添加单品</h2>
+        <span class="modal-progress" id="itemProgress"></span>
       </div>
       <div class="modal-body">
-        <!-- Phase 1: Upload up to 5 photos -->
-        <div class="add-phase" id="phaseUpload">
-          <div class="upload-zone" id="uploadZone">
+        <div id="itemPhaseUpload">
+          <div class="upload-zone" id="itemUploadZone">
             <div class="upload-icon">📸</div>
-            <p>点击选择照片</p>
+            <p>选择单品照片</p>
             <p class="upload-hint">最多 5 张，逐张确认入库</p>
-            <input type="file" id="batchFileInput" accept="image/*" multiple hidden>
+            <input type="file" id="itemFileInput" accept="image/*" multiple hidden>
           </div>
-          <div class="upload-thumbs" id="uploadThumbs"></div>
+          <div class="upload-thumbs" id="itemUploadThumbs"></div>
         </div>
-
-        <!-- Phase 2: Confirm each photo one by one -->
-        <div class="add-phase hidden" id="phaseConfirm">
-          <div class="confirm-photo-wrap">
-            <img id="confirmImg" class="confirm-img" alt="confirm">
-          </div>
-          <h3 class="step-title" id="confirmTitle">这张图里有什么？</h3>
-
-          <!-- Item chips to tag -->
-          <div class="item-tag-grid" id="confirmTagGrid">
-            <button class="item-tag-btn" data-type="上装"><span class="itb-icon">👕</span><span>上装</span></button>
-            <button class="item-tag-btn" data-type="下装"><span class="itb-icon">👖</span><span>下装</span></button>
-            <button class="item-tag-btn" data-type="外套"><span class="itb-icon">🧥</span><span>外套</span></button>
-            <button class="item-tag-btn" data-type="连衣裙"><span class="itb-icon">👗</span><span>连衣裙</span></button>
-            <button class="item-tag-btn" data-type="鞋子"><span class="itb-icon">👟</span><span>鞋子</span></button>
-            <button class="item-tag-btn" data-type="配饰"><span class="itb-icon">💍</span><span>配饰</span></button>
-          </div>
-
-          <!-- Per-item detail cards -->
-          <div class="items-detail-list" id="confirmDetails"></div>
-
-          <!-- Occasion + Temp for this batch -->
-          <div class="form-group" style="margin-top:16px">
-            <label>适合场合</label>
-            <div class="occasion-tags-sm" id="confirmOccasions">
-              <button class="tag-btn-sm" data-occ="通勤">通勤</button>
-              <button class="tag-btn-sm" data-occ="休闲">休闲</button>
-              <button class="tag-btn-sm" data-occ="约会">约会</button>
-              <button class="tag-btn-sm" data-occ="运动">运动</button>
-              <button class="tag-btn-sm" data-occ="正式">正式</button>
-              <button class="tag-btn-sm" data-occ="度假">度假</button>
+        <div id="itemPhaseConfirm" class="hidden">
+          <img id="itemConfirmImg" class="confirm-img" alt="">
+          <div class="form-group"><label>类别</label>
+            <div class="filter-scroll" id="itemCatPick">
+              <button class="filter-chip" data-val="上装">上装</button>
+              <button class="filter-chip" data-val="下装">下装</button>
+              <button class="filter-chip" data-val="外套">外套</button>
+              <button class="filter-chip" data-val="连衣裙">连衣裙</button>
+              <button class="filter-chip" data-val="鞋子">鞋子</button>
+              <button class="filter-chip" data-val="配饰">配饰</button>
             </div>
           </div>
-          <div class="form-group">
-            <label>适合温度</label>
+          <div class="form-group"><label>颜色</label><div class="color-row" id="itemColorPick"></div></div>
+          <div class="form-group"><label>季节</label>
+            <div class="filter-scroll" id="itemSeasonPick">
+              <button class="filter-chip" data-val="四季">四季</button>
+              <button class="filter-chip" data-val="春">春</button>
+              <button class="filter-chip" data-val="夏">夏</button>
+              <button class="filter-chip" data-val="秋">秋</button>
+              <button class="filter-chip" data-val="冬">冬</button>
+            </div>
+          </div>
+          <div class="form-group"><label>场合</label>
+            <div class="filter-scroll" id="itemOccPick">
+              <button class="filter-chip" data-val="通勤">通勤</button>
+              <button class="filter-chip" data-val="休闲">休闲</button>
+              <button class="filter-chip" data-val="约会">约会</button>
+              <button class="filter-chip" data-val="运动">运动</button>
+              <button class="filter-chip" data-val="正式">正式</button>
+              <button class="filter-chip" data-val="度假">度假</button>
+            </div>
+          </div>
+          <div class="form-group"><label>温度范围</label>
             <div class="temp-range">
-              <input type="range" id="confirmTempMin" min="-10" max="40" value="10" class="range-input">
-              <span class="range-label" id="confirmTempLabel">10°C — 25°C</span>
-              <input type="range" id="confirmTempMax" min="-10" max="40" value="25" class="range-input">
+              <input type="range" id="itemTempMin" min="-10" max="40" value="10" class="range-input">
+              <span class="range-label" id="itemTempLabel">10°C — 25°C</span>
+              <input type="range" id="itemTempMax" min="-10" max="40" value="25" class="range-input">
             </div>
+          </div>
+          <div class="form-group"><label>备注</label>
+            <textarea id="itemNote" class="form-input" rows="2" placeholder="随便写点什么"></textarea>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <span class="footer-hint" id="footerHint"></span>
-        <button class="btn-primary" id="btnConfirmItem">确认入库</button>
+        <span class="footer-hint" id="itemFooterHint"></span>
+        <button class="btn-primary" id="btnItemAction">开始确认</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Item Detail (with multi-photo) -->
-  <div id="modalItem" class="modal hidden">
+  <!-- ===== MODAL: Add Outfit ===== -->
+  <div id="modalAddOutfit" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <button class="modal-close" id="modalItemClose">✕</button>
-        <h2 id="modalItemTitle">单品详情</h2>
-        <button class="btn-text danger" id="btnDeleteItem">删除</button>
+        <button class="modal-close" data-close="modalAddOutfit">✕</button>
+        <h2>添加搭配组</h2>
+        <span></span>
       </div>
-      <div class="modal-body" id="modalItemBody"></div>
+      <div class="modal-body">
+        <div class="upload-zone" id="outfitUploadZone">
+          <div class="upload-icon">📸</div>
+          <p>上传全身搭配照</p>
+          <input type="file" id="outfitFileInput" accept="image/*" hidden>
+        </div>
+        <div class="hidden" id="outfitPreview">
+          <img id="outfitPreviewImg" class="confirm-img" alt="">
+        </div>
+        <div class="form-group"><label>季节</label>
+          <div class="filter-scroll" id="outfitSeasonPick">
+            <button class="filter-chip" data-val="四季">四季</button>
+            <button class="filter-chip" data-val="春">春</button>
+            <button class="filter-chip" data-val="夏">夏</button>
+            <button class="filter-chip" data-val="秋">秋</button>
+            <button class="filter-chip" data-val="冬">冬</button>
+          </div>
+        </div>
+        <div class="form-group"><label>备注</label>
+          <textarea id="outfitNote" class="form-input" rows="2" placeholder="这套搭配的灵感或场景"></textarea>
+        </div>
+        <div class="form-group">
+          <label>关联单品</label>
+          <div class="linked-items" id="linkedItemsList"></div>
+          <div class="link-actions">
+            <button class="btn-outline-sm" id="btnLinkFromWardrobe">从衣橱选择</button>
+            <button class="btn-outline-sm" id="btnLinkAddNew">快速添加新单品</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span></span>
+        <button class="btn-primary" id="btnSaveOutfit">保存搭配组</button>
+      </div>
     </div>
   </div>
 
-  <!-- Modal: Outfit Feedback -->
+  <!-- ===== MODAL: Pick items from wardrobe ===== -->
+  <div id="modalPickItems" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" data-close="modalPickItems">✕</button>
+        <h2>选择单品</h2>
+        <button class="btn-text" id="btnPickDone">完成</button>
+      </div>
+      <div class="modal-body">
+        <div class="pick-grid" id="pickGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Fullscreen image viewer ===== -->
+  <div id="modalViewer" class="modal-viewer hidden">
+    <div class="viewer-header">
+      <button class="viewer-close" id="viewerClose">✕</button>
+      <button class="viewer-like" id="viewerLike">♡</button>
+    </div>
+    <div class="viewer-body" id="viewerBody">
+      <img id="viewerImg" class="viewer-img" alt="">
+    </div>
+    <div class="viewer-info" id="viewerInfo"></div>
+  </div>
+
+  <!-- ===== MODAL: Record today's wear ===== -->
+  <div id="modalRecordWear" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" data-close="modalRecordWear">✕</button>
+        <h2>今天穿了什么？</h2>
+        <button class="btn-text" id="btnRecordDone">确认</button>
+      </div>
+      <div class="modal-body">
+        <div class="pick-grid" id="recordPickGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback modal -->
   <div id="modalFeedback" class="modal hidden">
     <div class="modal-content modal-sm">
       <h3>这套搭配怎么样？</h3>
       <div class="feedback-options">
         <button class="feedback-btn" data-fb="love">❤️ 超喜欢</button>
         <button class="feedback-btn" data-fb="ok">👌 还行</button>
-        <button class="feedback-btn" data-fb="clash">🎨 颜色不搭</button>
         <button class="feedback-btn" data-fb="style">💅 风格不对</button>
-        <button class="feedback-btn" data-fb="repeat">🔄 穿腻了</button>
         <button class="feedback-btn" data-fb="skip">⏭ 今天不想穿</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
 </div>
-
 <script src="app.js"></script>
 </body>
 </html>
