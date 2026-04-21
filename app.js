@@ -41,8 +41,7 @@ function dailyQ(){return QS[Math.floor(Date.now()/864e5)%QS.length]}
 function initHome(){document.getElementById('homeDate').textContent=fmtDate(new Date());const q=dailyQ();
 document.getElementById('homeGreeting').innerHTML=`<span class="quote-text">${q.t}</span><span class="quote-source">— ${q.s}</span>`;renderRecent();checkTodayWear()}
 
-let curOcc='通勤';
-document.getElementById('occasionTags').addEventListener('click',e=>{const b=e.target.closest('.tag-btn');if(!b)return;document.querySelectorAll('#occasionTags .tag-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');curOcc=b.dataset.occasion});
+document.getElementById('occasionTags')?.addEventListener('click',e=>{});
 
 function checkTodayWear(){const today=new Date().toDateString();const logged=S.wearLog.find(w=>new Date(w.date).toDateString()===today);
 const el=document.getElementById('twpChosen');if(logged){el.textContent='✓ 已记录';el.classList.remove('hidden')}else{el.classList.add('hidden')}}
@@ -55,7 +54,6 @@ let recoResults=[],curRecoIdx=0;
 function doRecommend(){
   if(S.items.length<2){toast('先去衣橱添加衣服吧');return}
   const pool=S.items.filter(it=>{
-    if(it.occasions&&it.occasions.length&&!it.occasions.includes(curOcc))return false;
     const now=new Date(),m=now.getMonth();const curSeason=m<2||m===11?'冬':m<5?'春':m<8?'夏':'秋';
     if(it.seasons&&it.seasons.length&&!it.seasons.includes(curSeason))return false;
     const cd=S.settings.cooldown*864e5,recent=new Set();S.wearLog.forEach(w=>{if(Date.now()-new Date(w.date).getTime()<cd)w.items.forEach(id=>recent.add(id))});
@@ -294,7 +292,7 @@ function showItemConfirm(idx){
   document.getElementById('btnItemAction').onclick=()=>saveItem(isLast)}
 
 // Chip toggles for item form
-['itemCatPick','itemSeasonPick','itemOccPick'].forEach(id=>{
+['itemCatPick','itemSeasonPick'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{const c=e.target.closest('.filter-chip');if(!c)return;
     if(id==='itemCatPick'){c.parentElement.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active')}
     else{if(c.dataset.val==='四季'){const all=['春','夏','秋','冬'];c.parentElement.querySelectorAll('.filter-chip').forEach(x=>{if(all.includes(x.dataset.val))x.classList.add('active')});c.classList.add('active')}else{c.classList.toggle('active');c.parentElement.querySelector('[data-val="四季"]')?.classList.remove('active')}}})});
@@ -306,10 +304,9 @@ function saveItem(isLast){
   if(!cat){toast('请选择类别');return}
   const color=document.querySelector('#itemColorPick .color-dot.active')?.dataset.color||'';
   const seasons=[...document.querySelectorAll('#itemSeasonPick .filter-chip.active')].map(c=>c.dataset.val).filter(v=>v!=='四季');
-  const occasions=[...document.querySelectorAll('#itemOccPick .filter-chip.active')].map(c=>c.dataset.val);
   const note=document.getElementById('itemNote').value.trim();
   const id=uid(),imgId='item_'+id;saveImage(imgId,itemBatch[itemBatchIdx]);
-  S.items.push({id,imageId:imgId,images:[imgId],category:cat,color,seasons,occasions,note,liked:false,createdAt:new Date().toISOString()});
+  S.items.push({id,imageId:imgId,images:[imgId],category:cat,color,seasons,note,liked:false,createdAt:new Date().toISOString()});
   saveS();toast('已入库 ✓');
   // After saving, offer to add outfit photos for this item
   lastSavedItemId=id;
@@ -345,10 +342,6 @@ document.getElementById('outfitFileInput').addEventListener('change',async e=>{
   document.getElementById('outfitUploadZone').classList.add('hidden');
   e.target.value=''});
 
-document.getElementById('outfitSeasonPick').addEventListener('click',e=>{const c=e.target.closest('.filter-chip');if(!c)return;
-  if(c.dataset.val==='四季'){['春','夏','秋','冬'].forEach(s=>{const el=c.parentElement.querySelector(`[data-val="${s}"]`);el?.classList.add('active')});c.classList.add('active')}
-  else{c.classList.toggle('active');c.parentElement.querySelector('[data-val="四季"]')?.classList.remove('active')}});
-
 function renderLinkedItems(){
   const c=document.getElementById('linkedItemsList');
   c.innerHTML=linkedIds.map(id=>{const it=S.items.find(x=>x.id===id);if(!it)return'';const img=getImage(it.imageId)||'';
@@ -364,11 +357,10 @@ document.getElementById('btnLinkAddNew').addEventListener('click',()=>{
 document.getElementById('btnSaveOutfit').addEventListener('click',()=>{
   if(!outfitImages.length){toast('请上传搭配照');return}
   if(!linkedIds.length){toast('请关联至少一件单品');return}
-  const seasons=[...document.querySelectorAll('#outfitSeasonPick .filter-chip.active')].map(c=>c.dataset.val).filter(v=>v!=='四季');
   const note=document.getElementById('outfitNote').value.trim();
   const id=uid();
   const imgIds=outfitImages.map((img,i)=>{const iid='outfit_'+id+'_'+i;saveImage(iid,img);return iid});
-  S.outfits.push({id,imageId:imgIds[0],images:imgIds,linkedItemIds:[...linkedIds],seasons,note,liked:false,createdAt:new Date().toISOString()});
+  S.outfits.push({id,imageId:imgIds[0],images:imgIds,linkedItemIds:[...linkedIds],note,liked:false,createdAt:new Date().toISOString()});
   saveS();document.getElementById('modalAddOutfit').classList.add('hidden');renderWardrobe();toast(`搭配组已保存（${outfitImages.length}张）✓`);lastSavedItemId=null});
 
 // === PICK ITEMS MODAL ===
