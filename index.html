@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SURI VOGUE — 我的智能衣橱</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- App Shell -->
+<div id="app">
+  <!-- Splash Screen -->
+  <div id="splash" class="splash">
+    <div class="splash-inner">
+      <div class="splash-logo">S·V</div>
+      <div class="splash-title">SURI VOGUE</div>
+      <div class="splash-sub">我的智能衣橱</div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div id="main" class="main">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left" id="topbarLeft"></div>
+      <div class="topbar-title" id="topbarTitle">SURI VOGUE</div>
+      <div class="topbar-right" id="topbarRight"></div>
+    </header>
+
+    <!-- Page: 今日穿搭 (Home) -->
+    <section id="page-home" class="page active">
+      <div class="page-scroll">
+        <div class="home-hero">
+          <div class="home-date" id="homeDate"></div>
+          <h1 class="home-greeting" id="homeGreeting">今天穿什么？</h1>
+        </div>
+        <div class="home-input-card">
+          <div class="input-row">
+            <label class="input-label">气温</label>
+            <div class="temp-selector">
+              <button class="temp-btn" data-delta="-1">−</button>
+              <span class="temp-value" id="tempValue">22</span>
+              <span class="temp-unit">°C</span>
+              <button class="temp-btn" data-delta="1">+</button>
+            </div>
+          </div>
+          <div class="input-row">
+            <label class="input-label">场合</label>
+            <div class="occasion-tags" id="occasionTags">
+              <button class="tag-btn active" data-occasion="通勤">通勤</button>
+              <button class="tag-btn" data-occasion="休闲">休闲</button>
+              <button class="tag-btn" data-occasion="约会">约会</button>
+              <button class="tag-btn" data-occasion="运动">运动</button>
+              <button class="tag-btn" data-occasion="正式">正式</button>
+              <button class="tag-btn" data-occasion="度假">度假</button>
+            </div>
+          </div>
+          <button class="btn-primary" id="btnRecommend">为我搭配</button>
+        </div>
+
+        <!-- Recommendations -->
+        <div id="recommendations" class="reco-container hidden">
+          <div class="reco-header">
+            <h2 class="section-title">今日推荐</h2>
+            <button class="btn-text" id="btnRefresh">换一批</button>
+          </div>
+          <div class="reco-list" id="recoList"></div>
+        </div>
+
+        <!-- Recent Wears -->
+        <div class="recent-section">
+          <h2 class="section-title">最近穿过</h2>
+          <div class="recent-list" id="recentList">
+            <div class="empty-hint">还没有穿着记录</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Page: 我的衣橱 -->
+    <section id="page-wardrobe" class="page">
+      <div class="page-scroll">
+        <div class="wardrobe-header">
+          <h1 class="page-title-lg">衣橱</h1>
+          <div class="wardrobe-stats" id="wardrobeStats">0 件单品 · 0 套搭配</div>
+        </div>
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <div class="filter-scroll" id="categoryFilter">
+            <button class="filter-chip active" data-cat="all">全部</button>
+            <button class="filter-chip" data-cat="上装">上装</button>
+            <button class="filter-chip" data-cat="下装">下装</button>
+            <button class="filter-chip" data-cat="外套">外套</button>
+            <button class="filter-chip" data-cat="连衣裙">连衣裙</button>
+            <button class="filter-chip" data-cat="鞋子">鞋子</button>
+            <button class="filter-chip" data-cat="包">包</button>
+            <button class="filter-chip" data-cat="配饰">配饰</button>
+          </div>
+        </div>
+        <!-- Items Grid -->
+        <div class="items-grid" id="itemsGrid">
+          <div class="empty-state">
+            <div class="empty-icon">👗</div>
+            <p>衣橱还是空的</p>
+            <p class="empty-sub">点击下方 + 开始添加你的衣服</p>
+          </div>
+        </div>
+        <!-- Outfits Tab -->
+        <div class="tab-switch">
+          <button class="tab-btn active" data-tab="items">单品</button>
+          <button class="tab-btn" data-tab="outfits">搭配组</button>
+        </div>
+        <div class="outfits-grid hidden" id="outfitsGrid"></div>
+      </div>
+      <button class="fab" id="fabAdd">+</button>
+    </section>
+
+    <!-- Page: 个人档案 -->
+    <section id="page-profile" class="page">
+      <div class="page-scroll">
+        <div class="profile-hero">
+          <div class="avatar-wrap" id="avatarWrap">
+            <div class="avatar-placeholder">+</div>
+            <img class="avatar-img hidden" id="avatarImg" alt="avatar">
+            <input type="file" id="avatarInput" accept="image/*" hidden>
+          </div>
+          <h1 class="profile-name" id="profileName">设置你的档案</h1>
+        </div>
+        <div class="profile-form">
+          <div class="form-group">
+            <label>昵称</label>
+            <input type="text" id="inputNickname" placeholder="你的名字" class="form-input">
+          </div>
+          <div class="form-row">
+            <div class="form-group half">
+              <label>身高 (cm)</label>
+              <input type="number" id="inputHeight" placeholder="165" class="form-input">
+            </div>
+            <div class="form-group half">
+              <label>体重 (kg)</label>
+              <input type="number" id="inputWeight" placeholder="55" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>穿衣风格偏好</label>
+            <div class="style-tags" id="styleTags">
+              <button class="style-tag" data-style="极简">极简</button>
+              <button class="style-tag" data-style="法式">法式</button>
+              <button class="style-tag" data-style="街头">街头</button>
+              <button class="style-tag" data-style="优雅">优雅</button>
+              <button class="style-tag" data-style="复古">复古</button>
+              <button class="style-tag" data-style="中性">中性</button>
+              <button class="style-tag" data-style="甜美">甜美</button>
+              <button class="style-tag" data-style="学院">学院</button>
+            </div>
+          </div>
+          <button class="btn-primary" id="btnSaveProfile">保存档案</button>
+        </div>
+        <div class="profile-actions">
+          <button class="btn-outline" id="btnExport">导出数据</button>
+          <button class="btn-outline" id="btnImport">导入数据</button>
+          <input type="file" id="importInput" accept=".json" hidden>
+        </div>
+        <div class="profile-settings">
+          <h3 class="settings-title">推荐设置</h3>
+          <div class="setting-row">
+            <span>冷却天数</span>
+            <div class="stepper">
+              <button class="stepper-btn" data-field="cooldown" data-delta="-1">−</button>
+              <span id="cooldownValue">7</span>
+              <button class="stepper-btn" data-field="cooldown" data-delta="1">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-page="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 21V13.5H14.5V21M4 10L12 3L20 10V19C20 20.1 19.1 21 18 21H6C4.9 21 4 20.1 4 19V10Z"/></svg>
+        <span>今日</span>
+      </button>
+      <button class="nav-item" data-page="wardrobe">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6H21M3 6V20C3 20.55 3.45 21 4 21H20C20.55 21 21 20.55 21 20V6M3 6L5 3H19L21 6M12 6V21M8 10H10M14 10H16"/></svg>
+        <span>衣橱</span>
+      </button>
+      <button class="nav-item" data-page="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M5 20C5 17.24 8.13 15 12 15C15.87 15 19 17.24 19 20"/></svg>
+        <span>我的</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Modal: Add Outfit -->
+  <div id="modalAdd" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalAddClose">✕</button>
+        <h2>添加搭配</h2>
+        <button class="btn-text" id="modalAddSave">保存</button>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Upload -->
+        <div class="add-step" id="addStep1">
+          <div class="upload-zone" id="uploadZone">
+            <div class="upload-icon">📸</div>
+            <p>点击上传搭配照片</p>
+            <p class="upload-hint">一张照片 = 一套搭配</p>
+            <input type="file" id="outfitFileInput" accept="image/*" multiple hidden>
+          </div>
+          <div class="uploaded-preview hidden" id="uploadedPreview">
+            <img id="uploadedImg" class="uploaded-img" alt="outfit">
+            <button class="btn-text-sm" id="btnReupload">重新上传</button>
+          </div>
+        </div>
+        <!-- Step 2: Tag Items -->
+        <div class="add-step hidden" id="addStep2">
+          <h3 class="step-title">这套搭配里有什么？</h3>
+          <p class="step-hint">点选这张图里包含的单品类别</p>
+          <div class="item-tag-grid" id="itemTagGrid">
+            <button class="item-tag-btn" data-type="上装">
+              <span class="itb-icon">👕</span><span>上装</span>
+            </button>
+            <button class="item-tag-btn" data-type="下装">
+              <span class="itb-icon">👖</span><span>下装</span>
+            </button>
+            <button class="item-tag-btn" data-type="外套">
+              <span class="itb-icon">🧥</span><span>外套</span>
+            </button>
+            <button class="item-tag-btn" data-type="连衣裙">
+              <span class="itb-icon">👗</span><span>连衣裙</span>
+            </button>
+            <button class="item-tag-btn" data-type="鞋子">
+              <span class="itb-icon">👟</span><span>鞋子</span>
+            </button>
+            <button class="item-tag-btn" data-type="包">
+              <span class="itb-icon">👜</span><span>包</span>
+            </button>
+            <button class="item-tag-btn" data-type="配饰">
+              <span class="itb-icon">💍</span><span>配饰</span>
+            </button>
+          </div>
+          <!-- Per-item details -->
+          <div class="items-detail-list" id="itemsDetailList"></div>
+        </div>
+        <!-- Step 3: Outfit meta -->
+        <div class="add-step hidden" id="addStep3">
+          <h3 class="step-title">搭配信息</h3>
+          <div class="form-group">
+            <label>适合场合</label>
+            <div class="occasion-tags-sm" id="addOccasionTags">
+              <button class="tag-btn-sm" data-occ="通勤">通勤</button>
+              <button class="tag-btn-sm" data-occ="休闲">休闲</button>
+              <button class="tag-btn-sm" data-occ="约会">约会</button>
+              <button class="tag-btn-sm" data-occ="运动">运动</button>
+              <button class="tag-btn-sm" data-occ="正式">正式</button>
+              <button class="tag-btn-sm" data-occ="度假">度假</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>适合温度范围</label>
+            <div class="temp-range">
+              <input type="range" id="tempMin" min="-10" max="40" value="10" class="range-input">
+              <span class="range-label" id="tempRangeLabel">10°C — 25°C</span>
+              <input type="range" id="tempMax" min="-10" max="40" value="25" class="range-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>备注</label>
+            <textarea id="outfitNote" class="form-input" rows="2" placeholder="比如"洗了会缩"或"只有这条腰带才配""></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="step-dots">
+          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+        <button class="btn-primary" id="btnNextStep">下一步</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Item Detail -->
+  <div id="modalItem" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalItemClose">✕</button>
+        <h2 id="modalItemTitle">单品详情</h2>
+        <button class="btn-text danger" id="btnDeleteItem">删除</button>
+      </div>
+      <div class="modal-body" id="modalItemBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Outfit Feedback -->
+  <div id="modalFeedback" class="modal hidden">
+    <div class="modal-content modal-sm">
+      <h3>这套搭配怎么样？</h3>
+      <div class="feedback-options">
+        <button class="feedback-btn" data-fb="love">❤️ 超喜欢</button>
+        <button class="feedback-btn" data-fb="ok">👌 还行</button>
+        <button class="feedback-btn" data-fb="clash">🎨 颜色不搭</button>
+        <button class="feedback-btn" data-fb="style">💅 风格不对</button>
+        <button class="feedback-btn" data-fb="repeat">🔄 穿腻了</button>
+        <button class="feedback-btn" data-fb="skip">⏭ 今天不想穿</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
