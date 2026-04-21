@@ -44,15 +44,6 @@
         <!-- Input Card -->
         <div class="home-input-card">
           <div class="input-row">
-            <label class="input-label">气温</label>
-            <div class="temp-selector">
-              <button class="temp-btn" data-delta="-1">−</button>
-              <span class="temp-value" id="tempValue">22</span>
-              <span class="temp-unit">°C</span>
-              <button class="temp-btn" data-delta="1">+</button>
-            </div>
-          </div>
-          <div class="input-row">
             <label class="input-label">场合</label>
             <div class="occasion-tags" id="occasionTags">
               <button class="tag-btn active" data-occasion="通勤">通勤</button>
@@ -278,13 +269,6 @@
               <button class="filter-chip" data-val="度假">度假</button>
             </div>
           </div>
-          <div class="form-group"><label>温度范围</label>
-            <div class="temp-range">
-              <input type="range" id="itemTempMin" min="-10" max="40" value="10" class="range-input">
-              <span class="range-label" id="itemTempLabel">10°C — 25°C</span>
-              <input type="range" id="itemTempMax" min="-10" max="40" value="25" class="range-input">
-            </div>
-          </div>
           <div class="form-group"><label>备注</label>
             <textarea id="itemNote" class="form-input" rows="2" placeholder="随便写点什么"></textarea>
           </div>
@@ -359,10 +343,18 @@
   <div id="modalViewer" class="modal-viewer hidden">
     <div class="viewer-header">
       <button class="viewer-close" id="viewerClose">✕</button>
+      <span class="viewer-counter" id="viewerCounter"></span>
       <button class="viewer-like" id="viewerLike">♡</button>
     </div>
     <div class="viewer-body" id="viewerBody">
       <img id="viewerImg" class="viewer-img" alt="">
+    </div>
+    <div class="viewer-actions" id="viewerActions">
+      <button class="viewer-action-btn" id="viewerAddOutfitPhotos">+ 搭配图</button>
+      <button class="viewer-action-btn" id="viewerLinkItems">+ 关联单品</button>
+      <button class="viewer-action-btn" id="viewerSortUp">↑</button>
+      <button class="viewer-action-btn" id="viewerSortDown">↓</button>
+      <input type="file" id="viewerOutfitInput" accept="image/*" multiple hidden>
     </div>
     <div class="viewer-info" id="viewerInfo"></div>
   </div>
