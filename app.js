@@ -2,7 +2,7 @@
    SURI VOGUE v3 — Full App Logic
    ============================================ */
 const IMG_P='sv_img_';
-function saveImage(id,d){try{localStorage.setItem(IMG_P+id,d)}catch(e){console.warn('Storage full',e)}}
+function saveImage(id,d){try{localStorage.setItem(IMG_P+id,d);return true}catch(e){console.warn('Storage full',e);toast('存储空间不足，请先删除一些旧照片');return false}}
 function getImage(id){return localStorage.getItem(IMG_P+id)||null}
 function deleteImage(id){localStorage.removeItem(IMG_P+id)}
 function getAllImages(){const r=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(IMG_P))r.push({id:k.slice(IMG_P.length),data:localStorage.getItem(k)})}return r}
@@ -17,7 +17,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.remove('hidden');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.add('hidden'),2200)}
 function fmtDate(d){const w=['日','一','二','三','四','五','六'];return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 星期${w[d.getDay()]}`}
 function readFile(f){return new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f)})}
-async function compress(url,mw=800){return new Promise(r=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>mw){h=h*mw/w;w=mw}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',.8))};img.src=url})}
+async function compress(url,mw=600){return new Promise(r=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');let w=img.width,h=img.height;if(w>mw){h=h*mw/w;w=mw}c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);r(c.toDataURL('image/jpeg',.6))};img.src=url})}
 
 const COLORS=[{n:'黑',h:'#1a1a1a'},{n:'白',h:'#f5f5f5'},{n:'灰',h:'#9e9e9e'},{n:'米',h:'#e8dcc8'},{n:'棕',h:'#8b6f47'},{n:'驼',h:'#c4a67d'},{n:'藏蓝',h:'#1a365d'},{n:'蓝',h:'#3b82f6'},{n:'红',h:'#c0392b'},{n:'粉',h:'#e8a0bf'},{n:'绿',h:'#2d6a4f'},{n:'紫',h:'#7c3aed'},{n:'黄',h:'#eab308'},{n:'橙',h:'#ea580c'}];
 
