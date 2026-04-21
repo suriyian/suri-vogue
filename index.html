@@ -196,64 +196,50 @@
     </nav>
   </div>
 
-  <!-- Modal: Add Outfit -->
+  <!-- Modal: Add Items (Redesigned) -->
   <div id="modalAdd" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
         <button class="modal-close" id="modalAddClose">✕</button>
-        <h2>添加搭配</h2>
-        <button class="btn-text" id="modalAddSave">保存</button>
+        <h2 id="modalAddTitle">添加衣服</h2>
+        <span class="modal-progress" id="modalProgress"></span>
       </div>
       <div class="modal-body">
-        <!-- Step 1: Upload -->
-        <div class="add-step" id="addStep1">
+        <!-- Phase 1: Upload up to 5 photos -->
+        <div class="add-phase" id="phaseUpload">
           <div class="upload-zone" id="uploadZone">
             <div class="upload-icon">📸</div>
-            <p>点击上传搭配照片</p>
-            <p class="upload-hint">一张照片 = 一套搭配</p>
-            <input type="file" id="outfitFileInput" accept="image/*" multiple hidden>
+            <p>点击选择照片</p>
+            <p class="upload-hint">最多 5 张，逐张确认入库</p>
+            <input type="file" id="batchFileInput" accept="image/*" multiple hidden>
           </div>
-          <div class="uploaded-preview hidden" id="uploadedPreview">
-            <img id="uploadedImg" class="uploaded-img" alt="outfit">
-            <button class="btn-text-sm" id="btnReupload">重新上传</button>
-          </div>
+          <div class="upload-thumbs" id="uploadThumbs"></div>
         </div>
-        <!-- Step 2: Tag Items -->
-        <div class="add-step hidden" id="addStep2">
-          <h3 class="step-title">这套搭配里有什么？</h3>
-          <p class="step-hint">点选这张图里包含的单品类别</p>
-          <div class="item-tag-grid" id="itemTagGrid">
-            <button class="item-tag-btn" data-type="上装">
-              <span class="itb-icon">👕</span><span>上装</span>
-            </button>
-            <button class="item-tag-btn" data-type="下装">
-              <span class="itb-icon">👖</span><span>下装</span>
-            </button>
-            <button class="item-tag-btn" data-type="外套">
-              <span class="itb-icon">🧥</span><span>外套</span>
-            </button>
-            <button class="item-tag-btn" data-type="连衣裙">
-              <span class="itb-icon">👗</span><span>连衣裙</span>
-            </button>
-            <button class="item-tag-btn" data-type="鞋子">
-              <span class="itb-icon">👟</span><span>鞋子</span>
-            </button>
-            <button class="item-tag-btn" data-type="包">
-              <span class="itb-icon">👜</span><span>包</span>
-            </button>
-            <button class="item-tag-btn" data-type="配饰">
-              <span class="itb-icon">💍</span><span>配饰</span>
-            </button>
+
+        <!-- Phase 2: Confirm each photo one by one -->
+        <div class="add-phase hidden" id="phaseConfirm">
+          <div class="confirm-photo-wrap">
+            <img id="confirmImg" class="confirm-img" alt="confirm">
           </div>
-          <!-- Per-item details -->
-          <div class="items-detail-list" id="itemsDetailList"></div>
-        </div>
-        <!-- Step 3: Outfit meta -->
-        <div class="add-step hidden" id="addStep3">
-          <h3 class="step-title">搭配信息</h3>
-          <div class="form-group">
+          <h3 class="step-title" id="confirmTitle">这张图里有什么？</h3>
+
+          <!-- Item chips to tag -->
+          <div class="item-tag-grid" id="confirmTagGrid">
+            <button class="item-tag-btn" data-type="上装"><span class="itb-icon">👕</span><span>上装</span></button>
+            <button class="item-tag-btn" data-type="下装"><span class="itb-icon">👖</span><span>下装</span></button>
+            <button class="item-tag-btn" data-type="外套"><span class="itb-icon">🧥</span><span>外套</span></button>
+            <button class="item-tag-btn" data-type="连衣裙"><span class="itb-icon">👗</span><span>连衣裙</span></button>
+            <button class="item-tag-btn" data-type="鞋子"><span class="itb-icon">👟</span><span>鞋子</span></button>
+            <button class="item-tag-btn" data-type="配饰"><span class="itb-icon">💍</span><span>配饰</span></button>
+          </div>
+
+          <!-- Per-item detail cards -->
+          <div class="items-detail-list" id="confirmDetails"></div>
+
+          <!-- Occasion + Temp for this batch -->
+          <div class="form-group" style="margin-top:16px">
             <label>适合场合</label>
-            <div class="occasion-tags-sm" id="addOccasionTags">
+            <div class="occasion-tags-sm" id="confirmOccasions">
               <button class="tag-btn-sm" data-occ="通勤">通勤</button>
               <button class="tag-btn-sm" data-occ="休闲">休闲</button>
               <button class="tag-btn-sm" data-occ="约会">约会</button>
@@ -263,29 +249,23 @@
             </div>
           </div>
           <div class="form-group">
-            <label>适合温度范围</label>
+            <label>适合温度</label>
             <div class="temp-range">
-              <input type="range" id="tempMin" min="-10" max="40" value="10" class="range-input">
-              <span class="range-label" id="tempRangeLabel">10°C — 25°C</span>
-              <input type="range" id="tempMax" min="-10" max="40" value="25" class="range-input">
+              <input type="range" id="confirmTempMin" min="-10" max="40" value="10" class="range-input">
+              <span class="range-label" id="confirmTempLabel">10°C — 25°C</span>
+              <input type="range" id="confirmTempMax" min="-10" max="40" value="25" class="range-input">
             </div>
-          </div>
-          <div class="form-group">
-            <label>备注</label>
-            <textarea id="outfitNote" class="form-input" rows="2" placeholder="比如"洗了会缩"或"只有这条腰带才配""></textarea>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <div class="step-dots">
-          <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-        </div>
-        <button class="btn-primary" id="btnNextStep">下一步</button>
+        <span class="footer-hint" id="footerHint"></span>
+        <button class="btn-primary" id="btnConfirmItem">确认入库</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Item Detail -->
+  <!-- Modal: Item Detail (with multi-photo) -->
   <div id="modalItem" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
