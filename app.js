@@ -62,11 +62,17 @@ document.querySelectorAll('.mx').forEach(b=>b.addEventListener('click',()=>{cons
 // === HOME ===
 function initHome(){
   const day=Math.floor(Date.now()/864e5);
-  document.getElementById('hero').style.backgroundImage=`url('${HEROES[day%HEROES.length]}')`;
+  // Try to load hero image, fallback to gradient
+  const heroEl=document.getElementById('hero');
+  const heroUrl=HEROES[day%HEROES.length];
+  const img=new Image();
+  img.onload=()=>{heroEl.style.backgroundImage=`url('${heroUrl}')`;heroEl.classList.add('loaded')};
+  img.onerror=()=>{};// keep gradient fallback
+  img.src=heroUrl;
   const q=QS[day%QS.length];
   document.getElementById('heroQuote').innerHTML=`${q.t.replace(/\n/g,'<br>')}<span class="q-src">— ${q.s}</span>`;
-  // Set current season
   const m=new Date().getMonth();const cs=m<2||m===11?'冬':m<5?'春':m<8?'夏':'秋';
+  curSeason=cs;
   document.querySelectorAll('.season-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===cs))}
 
 let curSeason='秋';
