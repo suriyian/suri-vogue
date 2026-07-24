@@ -8,185 +8,56 @@
 <style>
 :root{
   --bg:#fafafa;--card:#fff;--text:#1a1a1a;--sub:#888;--border:#eee;
-  --accent:#222;--tag-bg:#f0f0f0;--tag-active:#1a1a1a;--tag-active-text:#fff;
   --safe-t:env(safe-area-inset-top);--safe-b:env(safe-area-inset-bottom);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);-webkit-tap-highlight-color:transparent}
 
-/* Header */
-.header{position:sticky;top:0;z-index:100;background:var(--bg);padding:calc(var(--safe-t) + 12px) 16px 0;border-bottom:1px solid var(--border)}
-.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.header{position:sticky;top:0;z-index:100;background:var(--bg);padding:calc(var(--safe-t) + 14px) 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .logo{font-size:1rem;font-weight:700;letter-spacing:.1em}
 .count{font-size:.75rem;color:var(--sub)}
 
-/* Tabs */
-.tabs{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:10px}
-.tab{padding:6px 16px;border-radius:100px;font-size:.8rem;border:none;background:var(--tag-bg);color:var(--text);cursor:pointer;white-space:nowrap;transition:all .2s;font-weight:500}
-.tab.active{background:var(--tag-active);color:var(--tag-active-text)}
-.tab+.tab{margin-left:8px}
+.waterfall{padding:6px;columns:2;column-gap:6px}
+.card{break-inside:avoid;margin-bottom:6px;border-radius:8px;overflow:hidden;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card img{width:100%;display:block}
 
-/* Waterfall grid */
-.waterfall{padding:8px;columns:2;column-gap:8px}
-.card{break-inside:avoid;margin-bottom:8px;border-radius:10px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.card img{width:100%;display:block;border-radius:10px 10px 0 0}
-.card-info{padding:8px 10px 10px}
-.card-title{font-size:.72rem;color:var(--text);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-/* Fullscreen viewer */
 .viewer{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .viewer.open{opacity:1;pointer-events:all}
 .viewer-close{position:absolute;top:calc(var(--safe-t) + 12px);right:16px;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;z-index:10}
-.viewer img{max-width:92%;max-height:80vh;object-fit:contain;border-radius:8px}
-.viewer-label{position:absolute;bottom:calc(var(--safe-b) + 24px);left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font-size:.75rem;padding:0 20px}
-
-/* Empty */
-.empty{text-align:center;padding:80px 20px;color:var(--sub);font-size:.85rem}
+.viewer-counter{position:absolute;top:calc(var(--safe-t) + 16px);left:16px;color:rgba(255,255,255,.6);font-size:.72rem}
+.viewer img{max-width:92%;max-height:80vh;object-fit:contain;border-radius:6px}
+.viewer-hint{position:absolute;bottom:calc(var(--safe-b) + 20px);color:rgba(255,255,255,.4);font-size:.7rem}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <div class="header-top">
-    <div class="logo">SURI VOGUE</div>
-    <div class="count" id="count"></div>
-  </div>
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-cat="all">全部</button>
-    <button class="tab" data-cat="cold">秋冬</button>
-    <button class="tab" data-cat="hot">春夏</button>
-  </div>
+  <div class="logo">SURI VOGUE</div>
+  <div class="count" id="count"></div>
 </div>
-
 <div class="waterfall" id="waterfall"></div>
-
 <div class="viewer" id="viewer">
   <button class="viewer-close" id="vClose">✕</button>
+  <span class="viewer-counter" id="vCounter"></span>
   <img id="vImg" alt="">
-  <div class="viewer-label" id="vLabel"></div>
+  <span class="viewer-hint">← 滑动翻看 →</span>
 </div>
-
 <script>
-// Data - will be populated from file list
-const DATA = {
-  cold: [
-    {file:"cold/c06.jpg", title:"粉色毛衣+灰裤"},
-    {file:"cold/c07.jpg", title:"灰色针织背心+千鸟格裙"},
-    {file:"cold/c08.jpg", title:"蓝色毛衣+格纹裙"},
-    {file:"cold/c09.jpg", title:"米白毛衣+千鸟格裙"},
-    {file:"cold/c10.jpg", title:"灰色卫衣+棕色半裙"},
-    {file:"cold/c11.jpg", title:"深棕麂皮半裙"},
-    {file:"cold/c12.jpg", title:"橘色麻花毛衣"},
-    {file:"cold/c13.jpg", title:"鹅黄色圆领毛衣"},
-    {file:"cold/c14.jpg", title:"军绿毛领夹克+阔腿裤"},
-    {file:"cold/c15.jpg", title:"粉色编织短外套+灰色短裙"},
-    {file:"cold/c16.jpg", title:"小熊毛衣+藏蓝短裙"},
-    {file:"cold/c17.jpg", title:"黑色小香风外套+牛仔裤"},
-    {file:"cold/c19.jpg", title:"白色棉服+棕色阔腿裤"},
-    {file:"cold/c21.jpg", title:"黑色小香风外套"},
-    {file:"cold/c22.jpg", title:"红白条纹毛衣"},
-    {file:"cold/c23.jpg", title:"红白条纹毛衣+深棕半裙"},
-    {file:"cold/c24.png", title:"黑色皮衣+短裙+长靴"},
-    {file:"cold/c25.jpg", title:"深蓝针织开衫+牛仔裤"},
-    {file:"cold/c27.jpg", title:"BASEBALL卫衣+短裤"},
-    {file:"cold/c28.jpg", title:"灰色皮草外套+牛仔裤"},
-    {file:"cold/c29.jpg", title:"棕色混纺毛衣+白裤"},
-    {file:"cold/c31.jpg", title:"北欧提花毛衣+白裤"},
-  ],
-  hot: [
-    {file:"hot/h01.png", title:"军绿防晒衣+红短裤"},
-    {file:"hot/h02.jpg", title:"白色肌理无袖上衣"},
-    {file:"hot/h03.jpg", title:"酒红色泡泡无袖衫"},
-    {file:"hot/h04.jpg", title:"白衬衫+白裤+棕凉鞋"},
-    {file:"hot/h05.jpg", title:"彩色千鸟格A字裙"},
-    {file:"hot/h06.jpg", title:"白色立领衬衫"},
-    {file:"hot/h07.jpg", title:"灰色短袖T恤"},
-    {file:"hot/h08.png", title:"牛仔夹克+黑百褶裙"},
-    {file:"hot/h09.jpg", title:"牛仔外套+砖红T+棒球帽"},
-    {file:"hot/h10.png", title:"棕色针织背心+牛仔裤"},
-    {file:"hot/h11.png", title:"牛仔夹克+黑裙"},
-    {file:"hot/h12.jpg", title:"白色外套+珍珠半裙"},
-    {file:"hot/h13.jpg", title:"紫色风衣+白T+黑裙"},
-    {file:"hot/h14.jpg", title:"白色镂空针织开衫"},
-    {file:"hot/h15.jpg", title:"白色翻领无袖连衣裙"},
-    {file:"hot/h16.jpg", title:"蓝白T恤+百褶裙"},
-    {file:"hot/h17.jpg", title:"藏蓝吊带裙+乐福鞋"},
-    {file:"hot/h18.jpg", title:"黑T+白百褶短裙"},
-    {file:"hot/h19.png", title:"黑T+米白短裙"},
-    {file:"hot/h21.png", title:"eremin无袖针织衫"},
-    {file:"hot/h22.jpg", title:"灰T+米白百褶裙"},
-    {file:"hot/h23.png", title:"黑白条纹无袖+镂空阔腿裤"},
-    {file:"hot/h24.jpg", title:"eremin基础T恤四色"},
-    {file:"hot/h25.jpg", title:"灰色吊带连衣裙"},
-    {file:"hot/h27.jpg", title:"黑色丝绒高领无袖衫"},
-    {file:"hot/c03.jpg", title:"灰色编织领针织衫+百褶裙"},
-    {file:"hot/c04.jpg", title:"深棕菱格Polo针织衫"},
-    {file:"hot/c05.jpg", title:"粉色圆领毛衣+短裙"},
-    {file:"hot/c30.jpg", title:"牛仔短外套+白色连衣裙"},
-    {file:"hot/h28.jpg", title:"军绿外套+酒红短裤-自拍"},
-    {file:"hot/h29.jpg", title:"黑白条纹衫+黑裤+粉色鞋-自拍"},
-    {file:"hot/h30.jpg", title:"DHNG蓝色条纹T恤"},
-    {file:"hot/h31.jpg", title:"棕蓝条纹毛衣+黑短裙"},
-    {file:"hot/h32.jpg", title:"浅蓝条纹T恤+白裤"},
-    {file:"hot/h33.jpg", title:"绿色印花无袖连衣裙"},
-    {file:"hot/h34.jpg", title:"军绿夹克+条纹短裤+帆布鞋-自拍"},
-  ]
-};
+const FILES=["001.jpg","002.jpg","003.jpg","004.jpg","005.jpg","006.jpg","007.jpg","008.jpg","009.jpg","010.jpg","011.jpg","012.png","013.jpg","014.jpg","015.jpg","016.jpg","017.png","018.jpg","019.jpg","020.jpg","021.jpg","022.jpg","023.jpg","024.jpg","025.jpg","026.jpg","027.jpg","028.jpg","029.jpg","030.jpg","031.jpg","032.jpg","033.jpg","034.png","035.jpg","036.png","037.jpg","038.jpg","039.jpg","040.jpg","041.png","042.jpg","043.jpg","044.png","045.jpg","046.jpg","047.jpg","048.jpg","049.jpg","050.jpg","051.jpg","052.jpg","053.jpg","054.jpg","055.jpg","056.jpg","057.jpg","058.jpg","059.jpg","060.jpg","061.jpg","062.png","063.jpg"];
 
-let currentCat = 'all';
+// Shuffle on every open
+for(let i=FILES.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[FILES[i],FILES[j]]=[FILES[j],FILES[i]]}
 
-function render(cat) {
-  currentCat = cat;
-  const container = document.getElementById('waterfall');
-  let items = [];
-  if (cat === 'all') items = [...DATA.cold, ...DATA.hot];
-  else if (cat === 'cold') items = DATA.cold;
-  else items = DATA.hot;
-
-  document.getElementById('count').textContent = items.length + ' 件';
-
-  if (!items.length) {
-    container.innerHTML = '<div class="empty">暂无内容</div>';
-    return;
-  }
-
-  container.innerHTML = items.map((item, i) => `
-    <div class="card" data-idx="${i}">
-      <img src="closet/${item.file}" alt="${item.title}" loading="lazy">
-      <div class="card-info"><div class="card-title">${item.title}</div></div>
-    </div>
-  `).join('');
-}
-
-// Tabs
-document.getElementById('tabs').addEventListener('click', e => {
-  const tab = e.target.closest('.tab');
-  if (!tab) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  tab.classList.add('active');
-  render(tab.dataset.cat);
-});
+document.getElementById('count').textContent=FILES.length+' 件';
+document.getElementById('waterfall').innerHTML=FILES.map((f,i)=>`<div class="card" data-idx="${i}"><img src="closet/${f}" alt="" loading="lazy"></div>`).join('');
 
 // Viewer
-document.getElementById('waterfall').addEventListener('click', e => {
-  const card = e.target.closest('.card');
-  if (!card) return;
-  const img = card.querySelector('img');
-  const title = card.querySelector('.card-title');
-  document.getElementById('vImg').src = img.src;
-  document.getElementById('vLabel').textContent = title?.textContent || '';
-  document.getElementById('viewer').classList.add('open');
-});
-document.getElementById('vClose').addEventListener('click', () => {
-  document.getElementById('viewer').classList.remove('open');
-});
-document.getElementById('viewer').addEventListener('click', e => {
-  if (e.target === document.getElementById('viewer') || e.target === document.getElementById('vImg')) {
-    document.getElementById('viewer').classList.remove('open');
-  }
-});
-
-render('all');
+let vIdx=0;
+function showSlide(){document.getElementById('vImg').src='closet/'+FILES[vIdx];document.getElementById('vCounter').textContent=(vIdx+1)+'/'+FILES.length}
+document.getElementById('waterfall').addEventListener('click',e=>{const c=e.target.closest('.card');if(!c)return;vIdx=+c.dataset.idx;showSlide();document.getElementById('viewer').classList.add('open')});
+document.getElementById('vClose').addEventListener('click',()=>document.getElementById('viewer').classList.remove('open'));
+let sx=0;
+document.getElementById('viewer').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+document.getElementById('viewer').addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)<40){document.getElementById('viewer').classList.remove('open');return}if(dx<-40&&vIdx<FILES.length-1){vIdx++;showSlide()}else if(dx>40&&vIdx>0){vIdx--;showSlide()}});
 </script>
 </body>
 </html>
